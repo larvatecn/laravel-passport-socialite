@@ -12,7 +12,7 @@ This package helps integrate social login using laravel's native packages i.e. (
 ## Getting Started
 To get started add the following package to your composer.json file using this command.
 
-`composer require larva/laravel-passport-socialite`
+`composer require larva/laravel-passport-socialite -vv`
 
 ## Configuration
 When composer installs this package successfully, register the   `Larva\Passport\Socialite\PassportSocialiteServiceProvider::class` in your `config/app.php` configuration file.
