@@ -1,0 +1,33 @@
+{
+  "name": "larva/laravel-passport-socialite",
+  "description": "This is a Laravel passport grant for social.",
+  "keywords": [
+    "passport",
+    "laravel",
+    "social"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "laravel/passport": "^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0",
+    "illuminate/support": "^5.0 || ^6.0 || ^7.0 || ^8.0",
+    "league/oauth2-server": "^6.0 || ^7.0 || ^8.0",
+    "larva/laravel-socialite": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Larva\\Passport\\Socialite\\": "src"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0-dev"
+    },
+    "laravel": {
+      "providers": [
+        "Larva\\Passport\\Socialite\\PassportSocialiteServiceProvider"
+      ]
+    }
+  },
+  "prefer-stable": true
+}
