@@ -8,17 +8,19 @@
  *
  * @link        https://github.com/schedula/laravel-passport-socialite
  */
+
 namespace Larva\Passport\Socialite\User;
 
-use Laravel\Socialite\Contracts\User;
+use Larva\Socialite\Contracts\User;
 
-interface UserSocialAccount {
+interface UserSocialAccount
+{
     /**
      * Get user from social provider and from provider's user's id
-     * 
+     *
      * @param string $provider Provider name as requested from oauth e.g. facebook
      * @param User $socialUser user by provider
      * @param bool $autoRegistration
      */
-    public static function findForPassportSocialite($provider,User $socialUser, $autoRegistration = true);
+    public static function findForPassportSocialite($provider, User $socialUser, $autoRegistration = true);
 }
