@@ -56,14 +56,13 @@ class User extends Authenticatable implements UserSocialAccount {
     * Find user using social provider's user
     * 
     * @param string $provider Provider name as requested from oauth e.g. facebook
-    * @param string $socialUser User of social provider
+    * @param \Larva\Socialite\Contracts\User $socialUser User of social provider
     *
-    * @return User
+    * @return User|void
     */
     public static function findForPassportSocialite($provider,$socialUser) {
-        $account = SocialAccount::where('provider', $provider)->where('social_id', $socialUser->getId())->first();
-        if($account && $account->user) {
-            return $account->user;
+        if( $socialUser->user) {
+            return $socialUser->user;
         }
         return;
     }
@@ -71,7 +70,7 @@ class User extends Authenticatable implements UserSocialAccount {
 ```
 **Note: `SocialAccount` here is a laravel model where I am saving provider and provider_user_id and local database user id. Below is the example of `social_accounts` table**
 
-| id | provider | social_id | user_id | created_at        | updated_at        |
+| id | provider | open_id | user_id | created_at        | updated_at        |
 |----|----------|------------------|---------|-------------------|-------------------|
 | 1  | facebook | XXXXXXXXXXXXXX   | 1       | XX-XX-XX XX:XX:XX | XX-XX-XX XX:XX:XX |
 | 2  | github   | XXXXXXXXXXXXXX   | 2       | XX-XX-XX XX:XX:XX | XX-XX-XX XX:XX:XX |
