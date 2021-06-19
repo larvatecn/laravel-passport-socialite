@@ -29,8 +29,8 @@ When composer installs this package successfully, register the   `Larva\Passport
 
 ### S设置你的 User 模型
 
-添加 `findAndValidateForPassportSocialiteRequest` 方法到你的 `User` 模型，
-`findAndValidateForPassportSocialiteRequest` 方法接受两个参数 `$provider` and `$socialUser`。
+添加 `findAndValidateForPassportSocialite` 方法到你的 `User` 模型，
+`findAndValidateForPassportSocialite` 方法接受两个参数 `$provider` and `$socialUser`。
 
 **$provider - string - 你的社交账户提供商。如： facebook, google。**
 
