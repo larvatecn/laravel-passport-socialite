@@ -1,7 +1,6 @@
 # laravel-passport-socialite
-The missing social authentication plugin (i.e. SocialGrant) for laravel passport.
 
-修改自  https://github.com/schedula/laravel-passport-socialite
+The missing social authentication plugin (i.e. SocialGrant) for laravel passport.
 
 # Laravel Passport Socialite
 The missing social authentication plugin (i.e. SocialGrant) for laravel passport.
@@ -15,40 +14,36 @@ To get started add the following package to your composer.json file using this c
 `composer require larva/laravel-passport-socialite -vv`
 
 ## Configuration
-When composer installs this package successfully, register the   `Larva\Passport\Socialite\PassportSocialiteServiceProvider::class` in your `config/app.php` configuration file.
-
+When composer installs this package successfully, register the   `Larva\Passport\Socialite\PassportSocialiteGrantProvider::class` in your `config/app.php` configuration file.
 
 ```php
 'providers' => [
     // Other service providers...
-    Larva\Passport\Socialite\PassportSocialiteServiceProvider::class,
+    Larva\Passport\Socialite\PassportSocialiteGrantProvider::class,
 ],
 ```
 
 **Note: You need to configure third party social provider keys and secret strings as mentioned in laravel socialite documentation https://laravel.com/docs/5.6/socialite#configuration**
 
-## Usage
+## 使用
 
-### Step 1 - Setting up the User model
+### S设置你的 User 模型
 
-Implement `UserSocialAccount` on your `User` model and then add method `findForPassportSocialite`.
-`findForPassportSocialite` should accept two arguments i.e. `$provider` and `$socialUser`
-    
-**$provider - string - will be the social provider i.e. facebook, google, github etc.**
+添加 `findAndValidateForPassportSocialiteRequest` 方法到你的 `User` 模型，
+`findAndValidateForPassportSocialiteRequest` 方法接受两个参数 `$provider` and `$socialUser`。
 
-**$id - string - is the user id as per social provider for example facebook's user id 1234567890**
+**$provider - string - 你的社交账户提供商。如： facebook, google。**
+
+**$socialUser - \Larva\Socialite\Contracts\User - 社交服务商获取到的用户实例**
 
 **And the function should find the user which is related to that information and return user object or return null if not found**
-
-
 
 Below is how your `User` model should look like after above implementations.
 
 ```php
-namespace App;
+namespace App\Models;
 
-use Schedula\Laravel\PassportSocialite\User\UserSocialAccount;
-class User extends Authenticatable implements UserSocialAccount {
+class User extends Authenticatable {
     
     use HasApiTokens, Notifiable;
 
@@ -60,88 +55,13 @@ class User extends Authenticatable implements UserSocialAccount {
     *
     * @return User|void
     */
-    public static function findForPassportSocialite($provider,$socialUser) {
+    public static function findAndValidateForPassportSocialiteRequest(string $provider, \Larva\Socialite\Contracts\User $socialUser) {
         if( $socialUser->user) {
             return $socialUser->user;
         }
+        
+        // 你其他代码，例如自动注册用户 如果你绑定了用户 \Larva\Socialite\Contracts\User 里面有你绑定的用户模型实例
         return;
     }
 }
 ```
-**Note: `SocialAccount` here is a laravel model where I am saving provider and provider_user_id and local database user id. Below is the example of `social_accounts` table**
-
-| id | provider | open_id | user_id | created_at        | updated_at        |
-|----|----------|------------------|---------|-------------------|-------------------|
-| 1  | facebook | XXXXXXXXXXXXXX   | 1       | XX-XX-XX XX:XX:XX | XX-XX-XX XX:XX:XX |
-| 2  | github   | XXXXXXXXXXXXXX   | 2       | XX-XX-XX XX:XX:XX | XX-XX-XX XX:XX:XX |
-| 3  | google   | XXXXXXXXXXXXXX   | 3       | XX-XX-XX XX:XX:XX | XX-XX-XX XX:XX:XX |
-
-
-### Step 2 - Getting access token using social provider
-
-I recommend you to not to request for access token from social grant directly from your app since the logic / concept of social login is you need to create account if it doesn't exists or else login if exists. 
-
-So here in this case we will be making a custom route and a controller that will recieve the Access Token or Authorization Token from your client i.e. Android, iOS etc. application. **Here client fetches access token / authorization token from provider**
-
-Our route here can be something like this:
-
-`Route::post('/auth/social/facebook', 'SocialLogin@loginFacebook');`
-
-And here is how we can write our controller and its method for that :
-
-```php
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Route;
-class SocialLogin extends Controller {
-
-	public function loginFacebook(Request $request) {
-		try {
-
-			$facebook = Socialite::driver('facebook')->userFromToken($request->accessToken);
-			if(!$exist = SocialAccount::where('provider',  SocialAccount::SERVICE_FACEBOOK)->where('provider_user_id', $facebook->getId())->first()){
-				
-				// create user account
-			}
-			return response()->json($this->issueToken($request, 'facebook', $request->accessToken));
-		}
-		catch(\Exception $e) {
-			return response()->json([ "error" => $e->getMessage() ]);
-		}
-		
-	}
-    
-	public function issueToken($request, $provider, $accessToken) {
-		
-		/**
-		* Here we will request our app to generate access token 
-		* and refresh token for the user using its social identity by providing access token 
-		* and provider name of the provider. (I hope its not confusing)
-		* and then it goes through social grant and which fetches providers user id then calls 
-		* findForPassportSocialite from your user model if it returns User object then it generates 
-		* oauth tokens or else will throw error message normally like other oauth requests.
-		*/
-		$params = [
-			'grant_type' => 'social',
-			'client_id' => 'your-client-id', // it should be password grant client
-			'client_secret' => 'client-secret',
-			'accessToken' => $accessToken, // access token from provider
-			'provider' => $provider, // i.e. facebook
-		];
-		$request->request->add($params);
-		
-		$requestToken = Request::create("oauth/token", "POST");
-		$response = Route::dispatch($requestToken);
-		
-		return json_decode((string) $response->getBody(), true);
-	}
-}
-```
-
-**Note: SocialGrant will only accept access token not authorization token, for example google provides authorization token in android when requested server auth code i.e. offline access, so you need to exchange auth code for an access token. Refer here: https://github.com/google/google-api-php-client**
-
-**Note: SocialGrant acts similar to PasswordGrant so make sure you use client id and secret of password grant while making oauth request**
-
-
-**That's all folks**
-
