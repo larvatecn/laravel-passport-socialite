@@ -118,8 +118,8 @@ class SocialGrant extends AbstractGrant
         }
         try {
             $socialUser = Socialite::with($socialProvider)->stateless()->user();
-            if (method_exists($model, 'findAndValidateForPassportSocialiteRequest')) {
-                $user = (new $model)->findAndValidateForPassportSocialiteRequest($socialProvider, $socialUser);
+            if (method_exists($model, 'findAndValidateForPassportSocialite')) {
+                $user = (new $model)->findAndValidateForPassportSocialite($socialProvider, $socialUser);
                 if (!$user) {
                     return null;
                 }
